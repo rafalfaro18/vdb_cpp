@@ -11,6 +11,10 @@ CTestTestfile.cmake
 _deps
 CMakeUserPresets.json
 
+# RIDER
+
+.idea
+
 # Test blend files
 *.blend
 *.blend1
