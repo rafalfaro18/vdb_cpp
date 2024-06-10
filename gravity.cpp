@@ -1,6 +1,14 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/LevelSetSphere.h>
 #include <openvdb/tools/VolumeAdvect.h>
+
+std::string my_to_string2(int n, int width = 4)
+{
+    auto s = std::to_string(n);
+    if (int(s.size()) < width) s.insert(0, width - s.size(), '0');
+    return s;
+}
+
 int main()
 {
     openvdb::initialize();
@@ -22,10 +30,7 @@ int main()
     
     // Name the grid "density".
     grid->setName("density");
-    // Associate a scaling transform with the grid that sets the voxel size
-    // to 0.5 units in world space.
-    grid->setTransform(
-        openvdb::math::Transform::createLinearTransform(/*voxel size=*/0.5));
+    
     // Identify the grid as a fog volume.
     grid->setGridClass(openvdb::GRID_FOG_VOLUME);
 
@@ -55,8 +60,13 @@ int main()
     openvdb::io::File("velocity_0000.vdb").write(grids);
 
     // TODO: Put this in a for loop
-    auto advect = openvdb::tools::VolumeAdvection(*velocity);
-    auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*grid, 100);
+    for (int i = 1; i<=100; i++)
+    {
+        auto advect = openvdb::tools::VolumeAdvection(*velocity);
+        auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*grid, i);
+        
+        std::string name = "velocity_" + my_to_string2(i) + ".vdb";
+        openvdb::io::File(name).write({newGrid, velocity});    
+    }
     
-    openvdb::io::File("velocity_0100.vdb").write({newGrid});
 }
