@@ -1,5 +1,6 @@
 #include <openvdb/openvdb.h>
 #include <openvdb/tools/LevelSetSphere.h>
+#include <openvdb/tools/VolumeAdvect.h>
 int main()
 {
     openvdb::initialize();
@@ -49,7 +50,12 @@ int main()
     // Identify the grid as a staggered.
     velocity->setGridClass(openvdb::GRID_STAGGERED);
     grids.push_back(velocity);
+
+    // TODO: Put this in a for loop
+    auto advect = openvdb::tools::VolumeAdvection(*velocity);
+    auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*grid, 1.0);
     
     // Create a VDB file object and write out the grid.
-    openvdb::io::File("velocity.vdb").write(grids);
+    openvdb::io::File("velocity_0000.vdb").write(grids);
+    openvdb::io::File("velocity_0001.vdb").write({newGrid});
 }
