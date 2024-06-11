@@ -24,6 +24,9 @@ int main()
     xyz.reset(1, 2, -3);
     accessor.setValue(xyz, 2.0);
 
+    xyz.reset(1, 2, 1);
+    accessor.setValue(xyz, 1.0);
+
     // Associate a scaling transform with the grid that sets the voxel size
     // to 0.197 units in world space.
     grid->setTransform(openvdb::math::Transform::createLinearTransform(/*voxel size=*/0.197));
@@ -42,10 +45,10 @@ int main()
     auto velocity = openvdb::Vec3SGrid::create();
     openvdb::Vec3SGrid::Accessor accessorV = velocity->getAccessor();
     xyz.reset(1, -2, 3);
-    accessorV.setValue(xyz, openvdb::Vec3s(3.74609, -0.206909, 2.40625));
+    accessorV.setValue(xyz, openvdb::Vec3s(0, -0.0001, 0));
 
     xyz.reset(1, 2, -3);
-    accessorV.setValue(xyz, openvdb::Vec3s(-3.97266, -0.139526, 2.60938));
+    accessorV.setValue(xyz, openvdb::Vec3s(0, -0.0001, 0));
 
     // Associate a scaling transform with the grid that sets the voxel size
     // to 0.197 units in world space.
@@ -66,7 +69,7 @@ int main()
         auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*grid, i);
         
         std::string name = "velocity_" + my_to_string2(i) + ".vdb";
-        openvdb::io::File(name).write({newGrid, velocity});    
+        openvdb::io::File(name).write({newGrid});    
     }
     
 }
