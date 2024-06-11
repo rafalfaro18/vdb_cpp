@@ -19,10 +19,10 @@ int main()
     openvdb::FloatGrid::Accessor accessor = grid->getAccessor();
     // Define a coordinate with large signed indices.
     openvdb::Coord xyz(1, -2, 3);
-    accessor.setValue(xyz, 1.0);
+    accessor.setValue(xyz, 0);
 
     xyz.reset(1, 2, -3);
-    accessor.setValue(xyz, 2.0);
+    accessor.setValue(xyz, 0.0);
 
     xyz.reset(1, -100, 1);
     accessor.setValue(xyz, 1.0);
@@ -60,10 +60,10 @@ int main()
     auto velocity = openvdb::Vec3SGrid::create();
     openvdb::Vec3SGrid::Accessor accessorV = velocity->getAccessor();
     xyz.reset(1, -2, 3);
-    accessorV.setValue(xyz, openvdb::Vec3s(0, -0.065, 0));
+    accessorV.setValue(xyz, openvdb::Vec3s(0, 0.5, 0));
 
     xyz.reset(1, 2, -3);
-    accessorV.setValue(xyz, openvdb::Vec3s(0, 0.065, 0));
+    accessorV.setValue(xyz, openvdb::Vec3s(0, 0.5, 0));
 
     // Associate a scaling transform with the grid that sets the voxel size
     // to 1 units in world space.
@@ -76,25 +76,23 @@ int main()
 
     // Create a VDB file object and write out the grid.
     openvdb::io::File("velocity_0000.vdb").write(grids);
-
-    openvdb::FloatGrid::Ptr oldGrid;
     for (int i = 1; i<=250; i++)
     {
         auto advect = openvdb::tools::VolumeAdvection(*velocity);
         // Add the grid pointer to a container.
         openvdb::GridPtrVec newGrids;
+
+        const float slowdown = 0.1;
+        float newDensity = i * slowdown;
+
+        //auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*grid, i);
+        xyz.reset(1, -2, 3);
+        accessor.setValue(xyz, accessor.getValue(xyz) + newDensity);
+
+        xyz.reset(1, 2, -3);
+        accessor.setValue(xyz, accessor.getValue(xyz) + newDensity);
         
-        if(i == 1)
-        {
-            auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*grid, 1);
-            newGrids.push_back(newGrid);
-            oldGrid = grid->deepCopy();
-        } else
-        {
-            auto newGrid = advect.advect<openvdb::FloatGrid, openvdb::tools::PointSampler>(*oldGrid, 1);
-            newGrids.push_back(newGrid);
-            oldGrid = newGrid->deepCopy();
-        }
+        newGrids.push_back(grid);
         
         std::string name = "velocity_" + my_to_string2(i) + ".vdb";
         
