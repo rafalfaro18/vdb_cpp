@@ -16,29 +16,16 @@ int main()
 {
     // Initialize grid types and point attributes types.
     openvdb::initialize();
-
-    // Define a local function that doubles the value to which the given
-    // value iterator points.
-    struct Local {
-        static inline void op(const openvdb::FloatGrid::ValueOnIter& iter) {
-            iter.setValue(1.0);
-        }
-    };
-    
-    // Generate a level set grid. Note: This gets rendered perfectly in Houdini but in Blender looks like a square except in Cycles, but then it looks low poly
-    openvdb::FloatGrid::Ptr sphereGrid = openvdb::tools::createLevelSetSphere<openvdb::FloatGrid>(/*radius=*/20.0, /*center=*/openvdb::Vec3f(1.5, 2, 3), /*voxel size=*/0.5);
-    sphereGrid->setName("density");
-
-    openvdb::tools::foreach(sphereGrid->beginValueOn(), Local::op);
     
     // Create an empty velocity grid with gravity as background value
     openvdb::Vec3fGrid::Ptr gravity = openvdb::Vec3fGrid::create(openvdb::Vec3f(0, -9.81, 0));
     gravity->setName("gravity");
 
-    const openvdb::Vec3fGrid::Ptr someGrid = openvdb::Vec3fGrid::create(openvdb::Vec3f(0, -9.81, 0));
+    const openvdb::Vec3fGrid::Ptr someGrid = openvdb::Vec3fGrid::create(openvdb::Vec3f(1, 1, 1));
+    gravity->setName("density");
     
     // Create a VDB file object and write out the grid.
-    openvdb::io::File("velocity_0000.vdb").write({gravity, sphereGrid});
+    openvdb::io::File("velocity_0000.vdb").write({gravity, someGrid});
 
     for (int i = 1; i<=250; i++)
     {
@@ -47,6 +34,7 @@ int main()
         auto a = openvdb::tools::VolumeAdvection<openvdb::Vec3fGrid, false, openvdb::util::NullInterrupter>(*gravity);
         a.setIntegrator(openvdb::tools::Scheme::SEMI);
         auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::PointSampler>(*someGrid, 1);
+        newGrid->setName("density");
         
         std::string name = "velocity_" + my_to_string2(i) + ".vdb";
 
