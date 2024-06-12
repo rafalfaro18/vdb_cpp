@@ -40,16 +40,19 @@ int main()
     // Create a VDB file object and write out the grid.
     //openvdb::io::File("velocity_0000.vdb").write({gravity, someGrid});
     openvdb::io::File("velocity_0000.vdb").write({someGrid});
-
+    
+    openvdb::Vec3fGrid::Ptr prevGrid = someGrid->copy();
+    
     for (int i = 1; i<=250; i++)
     {
         auto a = openvdb::tools::VolumeAdvection<openvdb::Vec3fGrid, false, openvdb::util::NullInterrupter>(*gravity);
-        auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::BoxSampler>(*someGrid, i);
+        auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::BoxSampler>(*prevGrid, 1);
         newGrid->setName("density");
         
         std::string name = "velocity_" + my_to_string2(i) + ".vdb";
     
-        openvdb::io::File(name).write({newGrid});    
+        openvdb::io::File(name).write({newGrid});
+        prevGrid = newGrid->copy();
     }
     
 }
