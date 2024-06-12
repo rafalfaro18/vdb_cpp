@@ -43,8 +43,6 @@ int main()
 
     for (int i = 1; i<=250; i++)
     {
-        // Advect points in-place using gravity velocity grid
-        //openvdb::points::future::Advect(*sphereGrid, *gravity, /*integrationOrder=*/4, /*dt=*/1.0/24.0, /*timeSteps=*/1);
         auto a = openvdb::tools::VolumeAdvection<openvdb::Vec3fGrid, false, openvdb::util::NullInterrupter>(*gravity);
         auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::BoxSampler>(*someGrid, i);
         newGrid->setName("density");
