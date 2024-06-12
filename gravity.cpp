@@ -29,25 +29,28 @@ int main()
     openvdb::FloatGrid::Ptr sphereGrid = openvdb::tools::createLevelSetSphere<openvdb::FloatGrid>(/*radius=*/20.0, /*center=*/openvdb::Vec3f(1.5, 2, 3), /*voxel size=*/0.5);
     sphereGrid->setName("density");
 
-    // openvdb::tools::foreach(sphereGrid->beginValueOn(), Local::op);
+    openvdb::tools::foreach(sphereGrid->beginValueOn(), Local::op);
     
     // Create an empty velocity grid with gravity as background value
-    auto gravity = openvdb::Vec3SGrid::create(openvdb::Vec3s(0, -9.81, 0));
+    openvdb::Vec3fGrid::Ptr gravity = openvdb::Vec3fGrid::create(openvdb::Vec3f(0, -9.81, 0));
     gravity->setName("gravity");
+
+    const openvdb::Vec3fGrid::Ptr someGrid = openvdb::Vec3fGrid::create(openvdb::Vec3f(0, -9.81, 0));
     
     // Create a VDB file object and write out the grid.
     openvdb::io::File("velocity_0000.vdb").write({gravity, sphereGrid});
-    //for (int i = 1; i<=250; i++)
-    //{
 
+    for (int i = 1; i<=250; i++)
+    {
         // Advect points in-place using gravity velocity grid
-    //    openvdb::points::advectPoints(*sphereGrid, *gravity,
-    //        /*integrationOrder=*/4, /*dt=*/1.0/24.0, /*timeSteps=*/1);
+        //openvdb::points::future::Advect(*sphereGrid, *gravity, /*integrationOrder=*/4, /*dt=*/1.0/24.0, /*timeSteps=*/1);
+        auto a = openvdb::tools::VolumeAdvection<openvdb::Vec3fGrid, false, openvdb::util::NullInterrupter>(*gravity);
+        a.setIntegrator(openvdb::tools::Scheme::SEMI);
+        auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::PointSampler>(*someGrid, 1);
         
-    //    std::string name = "velocity_" + my_to_string2(i) + ".vdb";
-        
-        
-    //    openvdb::io::File(name).write({gravity, sphereGrid});    
-    //}
+        std::string name = "velocity_" + my_to_string2(i) + ".vdb";
+
+        openvdb::io::File(name).write({gravity, newGrid});    
+    }
     
 }
