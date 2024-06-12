@@ -34,12 +34,14 @@ int main()
     access.setValue(xyz, openvdb::Vec3f(1,1,1));
     xyz.reset(0, 50, 0);
     access.setValue(xyz, openvdb::Vec3f(1,1,1));
-    // TODO: Set voxel size1
-    gravity->setName("density");
+
+    // TODO: Set voxel size 1 for both, gravity and someGrid
+    
+    gravity->setName("velocity");
     
     // Create a VDB file object and write out the grid.
     //openvdb::io::File("velocity_0000.vdb").write({gravity, someGrid});
-    openvdb::io::File("velocity_0000.vdb").write({someGrid});
+    openvdb::io::File("velocity_0000.vdb").write({someGrid, gravity});
     
     openvdb::Vec3fGrid::Ptr prevGrid = someGrid->copy();
     
@@ -51,7 +53,7 @@ int main()
         
         std::string name = "velocity_" + my_to_string2(i) + ".vdb";
     
-        openvdb::io::File(name).write({newGrid});
+        openvdb::io::File(name).write({newGrid, gravity});
         prevGrid = newGrid->copy();
     }
     
