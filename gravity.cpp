@@ -32,8 +32,7 @@ int main()
         // Advect points in-place using gravity velocity grid
         //openvdb::points::future::Advect(*sphereGrid, *gravity, /*integrationOrder=*/4, /*dt=*/1.0/24.0, /*timeSteps=*/1);
         auto a = openvdb::tools::VolumeAdvection<openvdb::Vec3fGrid, false, openvdb::util::NullInterrupter>(*gravity);
-        a.setIntegrator(openvdb::tools::Scheme::SEMI);
-        auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::PointSampler>(*someGrid, 1);
+        auto newGrid = a.advect<openvdb::Vec3fGrid, openvdb::tools::BoxSampler>(*someGrid, 1);
         newGrid->setName("density");
         
         std::string name = "velocity_" + my_to_string2(i) + ".vdb";
