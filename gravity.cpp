@@ -30,6 +30,10 @@ int main()
     access.setValue(xyz, openvdb::Vec3f(1,1,1));
     xyz.reset(-10, -10, -10);
     access.setValue(xyz, openvdb::Vec3f(1,1,1));
+    xyz.reset(0, -50, 0);
+    access.setValue(xyz, openvdb::Vec3f(1,1,1));
+    xyz.reset(0, 50, 0);
+    access.setValue(xyz, openvdb::Vec3f(1,1,1));
     // TODO: Set voxel size1
     gravity->setName("density");
     
