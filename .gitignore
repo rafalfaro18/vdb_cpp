@@ -14,6 +14,9 @@ CMakeUserPresets.json
 # OpenVDB
 *.vdb
 
+# renders
+/renders/
+
 # RIDER
 
 .idea
